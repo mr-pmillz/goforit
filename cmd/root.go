@@ -57,7 +57,7 @@ func initConfig() {
 	} else {
 		homeDir, err := os.UserHomeDir()
 		if err != nil {
-			log.Panic("Could not get user homedir. Error: %+v\n", err)
+			log.Panicf("Could not get user homedir. Error: %+v\n", err)
 		}
 		// Search config in $HOME/.config/goforit/config.yaml directory with name "config.yaml"
 		viper.AddConfigPath(fmt.Sprintf("%s/.config/goforit", homeDir))
@@ -68,7 +68,7 @@ func initConfig() {
 	// If a config file is found, read it.
 	if err := viper.ReadInConfig(); err == nil {
 		configFileSet = true
-		fmt.Printf("Using config file: %v", viper.ConfigFileUsed())
+		fmt.Printf("Using config file: %v\n", viper.ConfigFileUsed())
 	}
 	viper.SetEnvPrefix(envPrefix)
 	viper.AutomaticEnv() // read in environment variables that match
