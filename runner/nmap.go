@@ -461,16 +461,10 @@ func modifyFilePermissions(filePaths []string) error {
 			return err
 		}
 
-		// Modify the permissions using sudo
-		cmd := exec.Command("sudo", "chmod", "+r", path)
-		if err = cmd.Run(); err != nil {
-			return err
-		}
-
 		// Change the file owner if necessary
 		fileOwner := fileInfo.Sys().(*syscall.Stat_t)
 		if fileOwner.Uid == 0 {
-			cmd = exec.Command("sudo", "chown", fmt.Sprintf("%s:%s", uid, gid), path) //nolint:gosec
+			cmd := exec.Command("sudo", "chown", fmt.Sprintf("%s:%s", uid, gid), path) //nolint:gosec
 			if err = cmd.Run(); err != nil {
 				return err
 			}
