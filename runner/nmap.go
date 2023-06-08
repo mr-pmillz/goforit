@@ -155,13 +155,19 @@ func runNmapAsync(outputDir string, targets map[string][]string) error {
 		return err
 	}
 	fmt.Printf("Running nmap against %d hosts\n", len(targets))
+	var wg sync.WaitGroup
+	var mu sync.Mutex
+	var errors []error
 	// Common channel for the goroutines
 	tasks := make(chan *exec.Cmd, len(targets))
+	var workers int
+	if len(targets) < 10 {
+		workers = len(targets)
+	} else {
+		workers = 10
+	}
 
-	var wg sync.WaitGroup
-
-	// Spawn 10 goroutines
-	for i := 0; i < 10; i++ {
+	for i := 0; i < workers; i++ {
 		wg.Add(1)
 		go func(num int, w *sync.WaitGroup) {
 			defer w.Done()
@@ -171,9 +177,13 @@ func runNmapAsync(outputDir string, targets map[string][]string) error {
 			)
 			for cmd := range tasks {
 				fmt.Printf("%s\n", strings.ReplaceAll(cmd.String(), "/usr/bin/bash -c ", ""))
-				out, err = cmd.Output()
+				out, err = cmd.CombinedOutput()
 				if err != nil {
-					fmt.Printf("can't get stdout: %+v", err)
+					log.Printf("Error executing command: %v", err)
+					mu.Lock()
+					errors = append(errors, fmt.Errorf("error executing command: %w", err))
+					mu.Unlock()
+					continue
 				}
 				fmt.Println(string(out))
 			}
@@ -188,17 +198,17 @@ func runNmapAsync(outputDir string, targets map[string][]string) error {
 		log.Fatalf("could not get nmap path: %v", err)
 	}
 	for target, ports := range targets {
-		var command string
-		if valid.IsDNSName(target) {
-			command = fmt.Sprintf("sudo %s -vvv -Pn -p %s -sC -sV -oA %s/nmap/%s-top-ports --resolve-all %s", nmapPath, strings.Join(ports, ","), outputDir, target, target)
-		} else {
-			command = fmt.Sprintf("sudo %s -vvv -Pn -p %s -sC -sV -oA %s/nmap/%s-top-ports %s", nmapPath, strings.Join(ports, ","), outputDir, target, target)
-		}
+		command := fmt.Sprintf("sudo %s -vvv -Pn --top-ports %d -T4 -sCV -oA %s/nmap/%s-top-ports %s", nmapPath, len(ports), outputDir, target, target)
 		tasks <- exec.Command(bashPath, "-c", command)
 	}
 	close(tasks)
 	// wait for the workers to finish
 	wg.Wait()
+
+	// Check for errors
+	if len(errors) > 0 {
+		return fmt.Errorf("encountered %d errors during execution", len(errors))
+	}
 	return nil
 }
 
