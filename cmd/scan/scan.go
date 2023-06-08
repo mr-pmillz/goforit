@@ -21,6 +21,7 @@ func configureCommand(cmd *cobra.Command) {
 	_ = runner.ConfigureCommand(cmd)
 }
 
+// LoadFromCommand ... receiver method on *Options
 func (opts *Options) LoadFromCommand(cmd *cobra.Command) error {
 	return opts.scanOptions.LoadFromCommand(cmd)
 }
@@ -36,7 +37,9 @@ Example Commands:
 	goforit scan -t scanme.nmap.org --output /tmp/scanme.nmap.org -v
 `,
 	PreRunE: func(cmd *cobra.Command, args []string) error {
+		// are we using a config file?
 		if configFileSet, err := cmd.Flags().GetBool("configfileset"); !configFileSet && err == nil {
+			// we are not using a config file, lets make these flags required
 			_ = cmd.MarkPersistentFlagRequired("output")
 			_ = cmd.MarkPersistentFlagRequired("target")
 		}
@@ -45,6 +48,7 @@ Example Commands:
 	Run: func(cmd *cobra.Command, args []string) {
 		var err error
 		opts := Options{}
+		// populate our options receiver object with cobra/viper user defined values via config.yaml via viper or cmd flags with cobra
 		if err = opts.LoadFromCommand(cmd); err != nil {
 			log.Fatalf("Cloud not LoadFromCommand %+v\n", err)
 		}
@@ -71,6 +75,7 @@ Example Commands:
 	},
 }
 
+// go handles the order of initialization functions.
 func init() {
 	configureCommand(Command)
 }

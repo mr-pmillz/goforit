@@ -22,6 +22,7 @@ func ConfigureCommand(cmd *cobra.Command) error {
 
 // LoadFromCommand ...
 func (opts *Options) LoadFromCommand(cmd *cobra.Command) error {
+	// ConfigureCommand has already run by the time LoadFromCommand gets called.
 	target, err := utils.ConfigureFlagOpts(cmd, &utils.LoadFromCommandOpts{
 		Flag:                 "target",
 		IsFilePath:           false,

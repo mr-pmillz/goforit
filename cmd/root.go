@@ -37,6 +37,8 @@ var RootCmd = &cobra.Command{
 	Long:    `Boilerplate skeleton Cobra Command Line Quick Starter`,
 }
 
+// https://tutorialedge.net/golang/the-go-init-function/
+// init only runs once automatically, we initialize the cobra command(s) and global flags
 func init() {
 	cobra.OnInitialize(initConfig)
 	RootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file default location for viper to look is ~/.config/goforit/config.yaml")
