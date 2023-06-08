@@ -200,3 +200,15 @@ func ReadLines(path string) ([]string, error) {
 	}
 	return lines, scanner.Err()
 }
+
+// FilePathWalkDir ...
+func FilePathWalkDir(dirPath string) ([]string, error) {
+	var files []string
+	err := filepath.Walk(dirPath, func(path string, info os.FileInfo, err error) error {
+		if !info.IsDir() {
+			files = append(files, path)
+		}
+		return nil
+	})
+	return files, err
+}

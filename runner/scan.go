@@ -2,7 +2,9 @@ package runner
 
 import (
 	"fmt"
+	"github.com/k0kubun/pp/v3"
 	"github.com/mr-pmillz/goforit/utils"
+	"log"
 	"reflect"
 )
 
@@ -50,8 +52,22 @@ func (h *Hosts) Scanner(opts *Options) error {
 
 	switch {
 	case opts.StreamNmap:
-		return streamNmap(targets, opts.Output)
+		if err := streamNmap(targets, opts.Output); err != nil {
+			return err
+		}
 	default:
-		return runNmapAsync(opts.Output, targets)
+		if err := runNmapAsync(opts.Output, targets); err != nil {
+			return err
+		}
 	}
+	parsedNmap, err := parseNmapResults(fmt.Sprintf("%s/nmap", opts.Output))
+	if err != nil {
+		log.Printf("error parsing nmap files...")
+		return nil
+	}
+	if _, err = pp.Println(parsedNmap); err != nil {
+		return err
+	}
+
+	return nil
 }
