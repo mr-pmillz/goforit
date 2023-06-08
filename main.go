@@ -1,11 +1,17 @@
 /*
-Copyright © 2023 NAME HERE <EMAIL ADDRESS>
+Package main
 
+Copyright © 2023 MrPMillz
 */
 package main
 
-import "github.com/mr-pmillz/goforit/cmd"
+import (
+	"github.com/mr-pmillz/goforit/cmd"
+	"log"
+)
 
 func main() {
-	cmd.Execute()
+	if err := cmd.RootCmd.Execute(); err != nil {
+		log.Fatalf("error running root command:\n%+v\n", err)
+	}
 }

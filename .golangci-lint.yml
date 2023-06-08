@@ -1,0 +1,33 @@
+run:
+  timeout: 5m
+
+linters:
+  disable-all: true
+  enable:
+    - bodyclose
+    - dupl
+    - errorlint
+    - exportloopref
+    - goconst
+    - gocognit
+    - gocritic
+    - goprintffuncname
+    - gosec
+    - gosimple
+    - govet
+    - ineffassign
+    - megacheck
+    - revive
+    - staticcheck
+    - stylecheck
+    - typecheck
+    - unconvert
+    - unused
+    - whitespace
+  fast: false
+
+linters-settings:
+  gosimple:
+    checks: ["all", "-S1028"]
+  staticcheck:
+    checks: ["all"]

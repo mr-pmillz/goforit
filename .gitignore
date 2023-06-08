@@ -1,2 +1,5 @@
 .idea/
 goforit
+config/*.yaml
+config/*.yml
+*.txt
