@@ -7,15 +7,17 @@ import (
 )
 
 type Options struct {
-	Target  interface{}
-	Verbose bool
-	Output  string
+	Target     interface{}
+	Verbose    bool
+	Output     string
+	StreamNmap bool
 }
 
 // ConfigureCommand ...
 func ConfigureCommand(cmd *cobra.Command) error {
 	cmd.PersistentFlags().StringP("target", "t", "", "target to scan")
 	cmd.PersistentFlags().BoolP("verbose", "v", false, "toggle verbosity")
+	cmd.PersistentFlags().BoolP("stream-nmap", "", false, "run nmap and stream results in real time")
 	cmd.PersistentFlags().StringP("output", "o", "", "directory to store all generated output")
 	return nil
 }
@@ -45,6 +47,12 @@ func (opts *Options) LoadFromCommand(cmd *cobra.Command) error {
 		return err
 	}
 	opts.Verbose = verbose
+
+	nmapStream, err := cmd.Flags().GetBool("stream-nmap")
+	if err != nil {
+		return err
+	}
+	opts.StreamNmap = nmapStream
 
 	output, err := utils.ConfigureFlagOpts(cmd, &utils.LoadFromCommandOpts{
 		Flag:       "output",
